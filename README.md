@@ -1,2 +1,2 @@
 # Robots-at-the-Edinburgh-International-Science-Festival
-Group Project for Napier University
+Group Project for Edinburgh Napier University
