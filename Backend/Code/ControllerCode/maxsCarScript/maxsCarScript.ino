@@ -27,7 +27,9 @@ void setup() {
 
 void loop() {
     //if some date is sent, reads it and saves in state 
+   //    Serial.println("read");
     if(Serial.available() > 0){     
+      Serial.println("read");
       state = Serial.read();   
       flag=0;
     }   
@@ -94,6 +96,7 @@ void loop() {
           flag=1;
         }
     }
+    
     //For debugging purpose
     //Serial.println(state);
 }
