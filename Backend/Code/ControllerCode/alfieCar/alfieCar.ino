@@ -1,5 +1,3 @@
-//#include <SoftwareSerial.h>
-
 //int enable1Pin = 0; // pin 1 on L293D IC
 //int enable2Pin = 1; // pin 9 on L293D IC
 
@@ -8,8 +6,6 @@ int motor1Pin2 = 5; // pin 7 on L293D IC
 
 int motor2Pin1 = 6; // pin 10 on L293D IC
 int motor2Pin2 = 7; // pin 15 on L293D IC
-
-//SoftwareSerial controllerRecieve(0, 1);
 
 int state;
 int flag = 0;      //makes sure that the serial only prints once the state
@@ -27,23 +23,16 @@ void setup() {
   // digitalWrite(enable2Pin, HIGH);
   // initialize serial communication at 9600 bits per second:
   Serial.begin(38400);
-  //controllerRecieve.begin(38400);
 }
 
 void loop() {
   //if some date is sent, reads it and saves in state
-  //    Serial.println("read");
   if (Serial.available() > 0) {
-    Serial.println("read from serial");
-    Serial.print(Serial.read());
     state = Serial.read();
+    Serial.print(state);
     flag = 0;
   }
-  /*   if(controllerRecieve.available() > 0){
-       Serial.println("read from controller");
-       state = Serial.read();
-       flag=0;
-     }*/
+
   // if the state is 'F' the DC motor will go forward
   if (state == 'F') {
     digitalWrite(motor1Pin1, HIGH);
