@@ -95,5 +95,5 @@ void loop()
   Serial.write(state);
   //Serial.println(xAxis);
   //Serial.println(yAxis);
-  delay(100);
+  delay(20);
 }

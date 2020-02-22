@@ -47,10 +47,10 @@ void loop() {
 
   // if the state is 'L' the motor will turn left
   else if (state == 'L') {
-    digitalWrite(motor1Pin1, LOW);
-    digitalWrite(motor1Pin2, HIGH);
-    digitalWrite(motor2Pin1, LOW);
-    digitalWrite(motor2Pin2, HIGH);
+    digitalWrite(motor1Pin1, HIGH);
+    digitalWrite(motor1Pin2, LOW);
+    digitalWrite(motor2Pin1, HIGH);
+    digitalWrite(motor2Pin2, LOW);
     if (flag == 0) {
       Serial.println("Turn LEFT");
       flag = 1;
@@ -73,10 +73,10 @@ void loop() {
   }
   // if the state is 'R' the motor will turn right
   else if (state == 'R') {
-    digitalWrite(motor1Pin1, HIGH);
-    digitalWrite(motor1Pin2, LOW);
-    digitalWrite(motor2Pin1, HIGH);
-    digitalWrite(motor2Pin2, LOW);
+    digitalWrite(motor1Pin1, LOW);
+    digitalWrite(motor1Pin2, HIGH);
+    digitalWrite(motor2Pin1, LOW);
+    digitalWrite(motor2Pin2, HIGH);
     if (flag == 0) {
       Serial.println("Turn RIGHT");
       flag = 1;
