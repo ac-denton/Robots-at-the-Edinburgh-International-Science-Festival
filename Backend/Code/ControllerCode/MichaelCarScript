@@ -1,0 +1,109 @@
+int enable1Pin = 0; // pin 1 on L293D IC
+int enable2Pin = 1; // pin 9 on L293D IC
+
+int motorLPinF = 4; // pin 2 on L293D IC
+int motorLPinB = 5; // pin 7 on L293D IC
+
+int motorRPinF = 6; // pin 10 on L293D IC
+int motorRPinB = 7; // pin 15 on L293D IC
+
+int motorLF = 0; //Left Forward Pin
+int motorLB = 0; //Left Backward Pin
+int motorRF = 0; //Right Forward Pin
+int motorLB = 0; //Right Backward Pin
+
+int state;
+int flag = 0;      //makes sure that the serial only prints once the state
+int stateStop = 0;
+void setup() {
+  // sets the pins as outputs:
+  pinMode(motorLPinF, OUTPUT);
+  pinMode(motorLPinB, OUTPUT);
+  //pinMode(enable1Pin, OUTPUT);
+  pinMode(motorRPinF, OUTPUT);
+  pinMode(motorRPinB, OUTPUT);
+ // pinMode(enable2Pin, OUTPUT);
+  // sets enable1Pin and enable2Pin high so that motor can turn on:
+  //digitalWrite(enable1Pin, HIGH);
+  // digitalWrite(enable2Pin, HIGH);
+  // initialize serial communication at 9600 bits per second:
+  Serial.begin(38400);
+}
+
+void loop() {
+  //if some date is sent, reads it and saves in state
+  if (Serial.available() > 0) {
+    state = Serial.read();
+    Serial.print(state);
+    flag = 0;
+  }
+
+  // Forwards and to the right
+  if (X > 10 && Y > 10) {
+
+    motorLF = yReading;
+    motorLB = LOW;
+
+    motorRF = yReading - xReading;
+    motorRB = LOW;
+
+    if (flag == 0) {
+      Serial.println("FR");
+      flag = 1;
+    }
+  }
+
+  // Forwards and to the left
+  else if X < 10 && Y > 10) {
+
+    motorLF = yReading + xReading;
+    motorLB = LOW;
+
+    motorRF = xReading;
+    motorRB = LOW;
+
+    if (flag == 0) {
+      Serial.println("FL");
+      flag = 1;
+    }
+  }
+
+    // Backwards and to the right
+  else if X > 10 && Y < 10) {
+
+    motorLF = LOW;
+    motorLB = yReading;
+
+    motorRF = LOW;
+    motorRB = yReading + xReading;
+
+    if (flag == 0) {
+      Serial.println("FL");
+      flag = 1;
+    }
+  }
+    //Backwards and to the left
+  else if X < 10 && Y < 10) {
+
+    motorLF = LOW;
+    motorLB = yReading - xReading;
+
+    motorRF = LOW;
+    motorRB = yReading;
+
+    if (flag == 0) {
+      Serial.println("FL");
+      flag = 1;
+    }
+  }
+
+  digitalWrite(motorLPinF, motorLF);
+  digitalWrite(motorLPinB, motorLB);
+  digitalWrite(motorRPinF, motorRF);
+  digitalWrite(motorRPinB, motorRB);
+}
+  
+
+  //For debugging purpose
+  //Serial.println(state);
+}
