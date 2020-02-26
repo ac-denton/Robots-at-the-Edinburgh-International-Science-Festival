@@ -1,11 +1,11 @@
-//int enable1Pin = 0; // pin 1 on L293D IC
-//int enable2Pin = 1; // pin 9 on L293D IC
+int enable1Pin = 0; // pin 1 on L293D IC
+int enable2Pin = 1; // pin 9 on L293D IC
 
-int motor1Pin1 = 4; // pin 2 on L293D IC
-int motor1Pin2 = 5; // pin 7 on L293D IC
+int motor1Pin1 = 5; // pin 2 on L293D IC
+int motor1Pin2 = 6; // pin 7 on L293D IC
 
-int motor2Pin1 = 6; // pin 10 on L293D IC
-int motor2Pin2 = 7; // pin 15 on L293D IC
+int motor2Pin1 = 8; // pin 10 on L293D IC
+int motor2Pin2 = 9; // pin 15 on L293D IC
 
 int state;
 int flag = 0;      //makes sure that the serial only prints once the state
@@ -14,10 +14,10 @@ void setup() {
   // sets the pins as outputs:
   pinMode(motor1Pin1, OUTPUT);
   pinMode(motor1Pin2, OUTPUT);
-  //pinMode(enable1Pin, OUTPUT);
+  pinMode(enable1Pin, OUTPUT);
   pinMode(motor2Pin1, OUTPUT);
   pinMode(motor2Pin2, OUTPUT);
- // pinMode(enable2Pin, OUTPUT);
+ pinMode(enable2Pin, OUTPUT);
   // sets enable1Pin and enable2Pin high so that motor can turn on:
   //digitalWrite(enable1Pin, HIGH);
   // digitalWrite(enable2Pin, HIGH);
@@ -36,9 +36,9 @@ void loop() {
   // if the state is 'F' the DC motor will go forward
   if (state == 'F') {
     digitalWrite(motor1Pin1, HIGH);
-    digitalWrite(motor1Pin2, LOW);
+      digitalWrite(motor1Pin2, LOW);
     digitalWrite(motor2Pin1, LOW);
-    digitalWrite(motor2Pin2, HIGH);
+   digitalWrite(motor2Pin2, HIGH);
     if (flag == 0) {
       Serial.println("Go Forward!");
       flag = 1;
