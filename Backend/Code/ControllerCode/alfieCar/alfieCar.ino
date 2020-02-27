@@ -1,15 +1,36 @@
-int enable1Pin = 0; // pin 1 on L293D IC
-int enable2Pin = 1; // pin 9 on L293D IC
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
 
-int motor1Pin1 = 5; // pin 2 on L293D IC
-int motor1Pin2 = 6; // pin 7 on L293D IC
+#define CE_PIN   9
+#define CSN_PIN 10
 
-int motor2Pin1 = 8; // pin 10 on L293D IC
-int motor2Pin2 = 9; // pin 15 on L293D IC
+int enable1Pin = 3; // pin 1 on L293D IC
+int enable2Pin = 6; // pin 9 on L293D IC
+
+int motor1Pin1 = 4; // pin 2 on L293D IC
+int motor1Pin2 = 5; // pin 7 on L293D IC
+
+int motor2Pin1 = 7; // pin 10 on L293D IC
+int motor2Pin2 = 8; // pin 15 on L293D IC
 
 int state;
 int flag = 0;      //makes sure that the serial only prints once the state
 int stateStop = 0;
+
+// SimpleRx - the slave or the receiver
+
+
+
+const byte thisSlaveAddress[5] = {'R','x','A','A','A'};
+
+RF24 radio(CE_PIN, CSN_PIN);
+
+char dataReceived[10]; // this must match dataToSend in the TX
+bool newData = false;
+
+
+
 void setup() {
   // sets the pins as outputs:
   pinMode(motor1Pin1, OUTPUT);
@@ -23,9 +44,18 @@ void setup() {
   // digitalWrite(enable2Pin, HIGH);
   // initialize serial communication at 9600 bits per second:
   Serial.begin(38400);
+   Serial.println("SimpleRx Starting");
+    radio.begin();
+    radio.setDataRate( RF24_250KBPS );
+    radio.openReadingPipe(1, thisSlaveAddress);
+    radio.startListening();
 }
 
 void loop() {
+
+    getData();
+    showData();
+  
   //if some date is sent, reads it and saves in state
   if (Serial.available() > 0) {
     state = Serial.read();
@@ -99,4 +129,19 @@ void loop() {
 
   //For debugging purpose
   //Serial.println(state);
+}
+
+void getData() {
+    if ( radio.available() ) {
+        radio.read( &dataReceived, sizeof(dataReceived) );
+        newData = true;
+    }
+}
+
+void showData() {
+    if (newData == true) {
+        Serial.print("Data received ");
+        Serial.println(dataReceived);
+        newData = false;
+    }
 }
