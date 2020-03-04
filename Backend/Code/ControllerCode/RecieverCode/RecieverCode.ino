@@ -31,6 +31,7 @@ void setup() {
 
 void loop() {
     getData();
+    doData();
     showData();
 }
 
@@ -42,6 +43,8 @@ void getData() {
         newData = true;
     }
 }
+
+void doData();
 
 void showData() {
     if (newData == true) {
