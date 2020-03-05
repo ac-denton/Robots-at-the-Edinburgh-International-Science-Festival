@@ -15,10 +15,13 @@ int motorR = 0;
 float xReading = 0;
 float yReading = 0;
 
+
+float v;
+float vRaw;
 int state;
 int flag = 0;      //makes sure that the serial only prints once the state
 int stateStop = 0;
-
+float normalize = 256/363;
 void setup() {
   // sets the pins as outputs:
   pinMode(motorLPinF, OUTPUT);
@@ -46,28 +49,24 @@ void loop() {
   xReading = analogRead(X_pin)/2 - 256;
   yReading = -(analogRead(Y_pin)/2 - 256);
   
-  float vRaw = sqrt(pow(yReading,2) + pow(xReading,2));
-  float normalize = 256/363;
-  float v = 256*vRaw/363;
-  int steer = abs(xReading);
-  int R = (255 - abs(xReading))/255;
-  int w = 1;
+  vRaw = sqrt(pow(yReading,2) + pow(xReading,2));
+  v = 256*vRaw/363;
 
   if (xReading >= 0 && yReading >= 0)
       motorL = v;
-      motorR = v - xReading;
+      motorR = v - 2*xReading;
       
   if (xReading < 0 && yReading >= 0)
-      motorL = v + xReading;
+      motorL = v + 2*xReading;
       motorR = v;
       
   if (xReading >= 0 && yReading < 0)
-      motorL = -v;
-      motorR = -v + xReading;
+      motorL = -v + 2*xReading;
+      motorR = -v;
       
   if (xReading < 0 && yReading < 0)
-      motorL = -v - xReading;
-      motorR = -v;
+      motorL = -v;
+      motorR = -v - 2*xReading;
 
    
 
@@ -113,8 +112,8 @@ void loop() {
           digitalWrite(motorRPinB, HIGH);
         }
     
-        digitalWrite(enableLPin, abs(motorL));
-        digitalWrite(enableRPin, abs(motorR));
+        analogWrite(enableLPin, abs(motorL));
+        analogWrite(enableRPin, abs(motorR));
   }
   else
   {
