@@ -15,21 +15,9 @@ int motorR = 0;
 float xReading = 0;
 float yReading = 0;
 
-
-float v;
-float vRaw;
 int state;
 int flag = 0;      //makes sure that the serial only prints once the state
 int stateStop = 0;
-float normalize = 256/363;
-int parsedInt;
-
-const byte numChars = 32;
-char receivedChars[numChars];   // an array to store the received data
-
-boolean newData = false;
-
-int dataNumber = 0;  
 
 void setup() {
   // sets the pins as outputs:
@@ -50,52 +38,42 @@ void setup() {
 
 void loop() {
   //if some date is sent, reads it and saves in state
-  /*if (Serial.available() > 0) {
-    int val = Serial.parseInt(); //read int or parseFloat for ..float...
-    Serial.println(val);
-   /* state = Serial.read();
-       parsedInt = Serial.read() - '0';
-    if(parsedInt >= 10000)
-    {
-      xReading = parsedInt - 10000;
-    }
-    else 
-    {
-      yReading = parsedInt;
-    }
-    
-    Serial.println(state);
+  if (Serial.available() > 0) {
+    state = Serial.read();
+    //Serial.print(state);
     flag = 0;
-  }*/
-  recvWithEndMarker();
-  showNewNumber();
-  xReading = xReading/2 - 256;
-  yReading = -yReading/2 - 256;
+  }
+  xReading = analogRead(X_pin)/2 - 256;
+  yReading = -(analogRead(Y_pin)/2 - 256);
   
-  vRaw = sqrt(pow(yReading,2) + pow(xReading,2));
-  v = 256*vRaw/363;
+  float vRaw = sqrt(pow(yReading,2) + pow(xReading,2));
+  float normalize = 256/363;
+  float v = 256*vRaw/363;
+  int steer = abs(xReading);
+  int R = (255 - abs(xReading))/255;
+  int w = 1;
 
   if (xReading >= 0 && yReading >= 0)
       motorL = v;
-      motorR = v - 2*xReading;
+      motorR = v - xReading;
       
   if (xReading < 0 && yReading >= 0)
-      motorL = v + 2*xReading;
+      motorL = v + xReading;
       motorR = v;
       
   if (xReading >= 0 && yReading < 0)
-      motorL = -v + 2*xReading;
-      motorR = -v;
+      motorL = -v;
+      motorR = -v + xReading;
       
   if (xReading < 0 && yReading < 0)
-      motorL = -v;
-      motorR = -v - 2*xReading;
+      motorL = -v - xReading;
+      motorR = -v;
 
    
 
 //  motorL = yReading;
 //  motorR = yReading;
-/*
+
   Serial.print("JOYSTICK  ");
   Serial.print(xReading);
   Serial.print(", ");
@@ -109,7 +87,7 @@ void loop() {
   Serial.print(" | ");
   Serial.print(v);
   
-  Serial.println("");*/
+  Serial.println("");
   if (abs(motorL) > 10 or abs(motorR) > 10)
   {
       if (motorL >= 0)
@@ -135,8 +113,8 @@ void loop() {
           digitalWrite(motorRPinB, HIGH);
         }
     
-        analogWrite(enableLPin, abs(motorL));
-        analogWrite(enableRPin, abs(motorR));
+        digitalWrite(enableLPin, abs(motorL));
+        digitalWrite(enableRPin, abs(motorR));
   }
   else
   {
@@ -146,43 +124,7 @@ void loop() {
       digitalWrite(motorRPinB, LOW);
   }
 }
-
-void recvWithEndMarker() {
-    static byte ndx = 0;
-    char endMarker = '\n';
-    char rc;
-   
-    if (Serial.available() > 0) {
-        Serial.println("in serial");
-        rc = Serial.read();
-
-        if (rc != endMarker) {
-            receivedChars[ndx] = rc;
-            ndx++;
-            if (ndx >= numChars) {
-                ndx = numChars - 1;
-            }
-        }
-        else {
-            receivedChars[ndx] = '\0'; // terminate the string
-            ndx = 0;
-            newData = true;
-        }
-    }
-}
-
-void showNewNumber() {
-    if (newData == true) {
-        dataNumber = 0;             // new for this version
-        dataNumber = atoi(receivedChars);   // new for this version
-        Serial.print("This just in ... ");
-        Serial.println(receivedChars);
-        Serial.print("Data as Number ... ");    // new for this version
-        Serial.println(dataNumber);     // new for this version
-        newData = false;
-    }
-}
-
+  
 
   //For debugging purpose
   //Serial.println(state);

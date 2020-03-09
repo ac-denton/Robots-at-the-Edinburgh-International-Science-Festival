@@ -30,6 +30,8 @@ char char3[3];
 char char2[2];
 char char1[1];
 String strVal;
+String strXVal;
+String strYVal;
 
 void setup() {
 
@@ -50,6 +52,8 @@ void loop() {
 
   xAxis = analogRead(X_pin); // Read Joysticks X-axis
   yAxis = analogRead(Y_pin); // Read Joysticks Y-axis
+
+ // xAxis += 10000;
   
   if (yAxis > 550) //Forward, generally.
   {
@@ -76,7 +80,22 @@ void loop() {
   }
 
   Serial.write(state);
-delay(10);
+  //delay(10);
+
+//Serial.println(xAxis);
+//Serial.println(yAxis);
+/*strXVal = xAxis;
+strYVal = yAxis;
+
+char strchX[strXVal.length()];
+strXVal.toCharArray(strchX, strXVal.length());
+
+  Serial.write(strchX);
+
+  char strchY[strYVal.length()];
+  strYVal.toCharArray(strchY, strYVal.length());
+  
+  Serial.write(strchY);*/
 
 //updateMessageState(state);
 

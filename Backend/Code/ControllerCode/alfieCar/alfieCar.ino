@@ -8,8 +8,8 @@
 int enable1Pin = 3; // pin 1 on L293D IC
 int enable2Pin = 6; // pin 9 on L293D IC
 
-int motor1Pin1 = 5; // pin 2 on L293D IC
-int motor1Pin2 = 6; // pin 7 on L293D IC
+int motor1Pin1 = 4; // pin 2 on L293D IC
+int motor1Pin2 = 5; // pin 7 on L293D IC
 
 int motor2Pin1 = 7; // pin 10 on L293D IC
 int motor2Pin2 = 8; // pin 15 on L293D IC
