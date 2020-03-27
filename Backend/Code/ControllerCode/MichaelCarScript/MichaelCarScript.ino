@@ -24,6 +24,8 @@ int stateStop = 0;
 float normalize = 256/363;
 void setup() {
   // sets the pins as outputs:
+
+  //in the motor pin naming scheme, L is for left, R for right, F for forwards and B for backwards
   pinMode(motorLPinF, OUTPUT);
   pinMode(motorLPinB, OUTPUT);
   
@@ -32,9 +34,7 @@ void setup() {
 
   pinMode(enableLPin, OUTPUT);
   pinMode(enableRPin, OUTPUT);
-  // sets enable1Pin and enable2Pin high so that motor can turn on:
-  //digitalWrite(enable1Pin, HIGH);
-  // digitalWrite(enable2Pin, HIGH);
+  
   // initialize serial communication at 9600 bits per second:
   Serial.begin(38400);
 }
@@ -46,12 +46,18 @@ void loop() {
     //Serial.print(state);
     flag = 0;
   }
-  xReading = analogRead(X_pin)/2 - 256;
-  yReading = -(analogRead(Y_pin)/2 - 256);
-  
-  vRaw = sqrt(pow(yReading,2) + pow(xReading,2));
-  v = 256*vRaw/363;
 
+  //xReading and yReading have a range of 0 - 1023, but to understand the code easier I have mapped it to the range -255 - 255
+  xReading = map(analogRead(X_pin), 0, 1023, -255, 255);
+  yReading = -(map(analogRead(Y_pin), 0, 1023, -255, 255));
+
+  //vRaw is the distance of the joystick from the rest position. This is used to determine the speed at which to move the robot (v). 
+  vRaw = sqrt(pow(yReading,2) + pow(xReading,2));
+  
+  //the maximum value for vRaw is 363 which needs reducing to 255
+  v = map(vRaw, 0, 363, 0, 255);
+
+  //Different steering quadrants
   if (xReading >= 0 && yReading >= 0)
   {
       motorL = v;
@@ -81,6 +87,7 @@ void loop() {
 //  motorL = yReading;
 //  motorR = yReading;
 
+  //if you open the serial monitor, you can see the values of the joystick readings, the speeds written to each motor and the value of v
   Serial.print("JOYSTICK  ");
   Serial.print(xReading);
   Serial.print(", ");
@@ -96,8 +103,10 @@ void loop() {
   
   Serial.println("");
 
+  //the joystick rests slightly off of (0,0), so this means that if it isn't more than 10 away from the centre then the robot should stay at rest
   if (abs(motorL) > 10 or abs(motorR) > 10)
   {
+    //if stateents to determine which pins to set high depending on the speed set to each motor
       if (motorL >= 0)
         {
           digitalWrite(motorLPinF, HIGH);
@@ -124,6 +133,7 @@ void loop() {
         analogWrite(enableLPin, abs(motorL));
         analogWrite(enableRPin, abs(motorR));
   }
+  //makes the robot stay at rest if the joystickis at rest 
   else
   {
       digitalWrite(motorLPinF, LOW);
@@ -133,6 +143,3 @@ void loop() {
   }
 }
   
-
-  //For debugging purpose
-  //Serial.println(state);
