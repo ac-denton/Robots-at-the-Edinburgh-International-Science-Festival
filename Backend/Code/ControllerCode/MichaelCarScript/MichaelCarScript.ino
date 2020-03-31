@@ -35,7 +35,7 @@ void setup() {
   pinMode(enableLPin, OUTPUT);
   pinMode(enableRPin, OUTPUT);
   
-  // initialize serial communication at 9600 bits per second:
+  // initialize serial communication at 38400 bits per second:
   Serial.begin(38400);
 }
 
