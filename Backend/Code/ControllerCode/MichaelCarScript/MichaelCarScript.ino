@@ -99,7 +99,8 @@ void loop() {
   Serial.print(", ");
   Serial.print(motorR);
   Serial.print(" | ");
-  Serial.print(v);
+  Serial.print(state);
+  
   
   Serial.println("");
 
@@ -129,6 +130,16 @@ void loop() {
           digitalWrite(motorRPinF, LOW);
           digitalWrite(motorRPinB, HIGH);
         }
+        
+        if (abs(motorL)>=255)
+        {
+          motorL = 255* motorL / abs(motorL);
+        }
+        if (abs(motorR)>=255)
+        {
+          motorR = 255* motorR / abs(motorR); 
+        }
+        
     
         analogWrite(enableLPin, abs(motorL));
         analogWrite(enableRPin, abs(motorR));
