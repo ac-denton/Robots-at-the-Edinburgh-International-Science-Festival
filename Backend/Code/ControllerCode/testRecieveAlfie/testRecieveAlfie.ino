@@ -1,6 +1,8 @@
 String readData;
 int counter; 
 int flag;
+String xReading;
+String yReading;
 char c='E';
 void setup() {
   // put your setup code here, to run once:
@@ -8,35 +10,38 @@ void setup() {
 }
 
 void loop() {
-  flag=0;
+  
   // put your main code here, to run repeatedly:
+  
   counter=0;
+  flag=0;
   
   if (Serial.available())
   {
     c = Serial.read();
+    //Serial.println(c);
+  }
+
+  if (c!=',' && c!='E')
+  {
     readData += c;
   }
-  if (c=='E')
+  else if (c==',')
   {
-    Serial.println(readData);
+    xReading = readData;
+    //readData = "";
+  }
+  else if (c=='E')
+  {
+    yReading = readData;
+    //readData="";
     flag=1;
-    readData="";
   }
   
-  if (flag=1)
+  if (flag==1)
   {
-    Serial.println("-------------------------------");
+    Serial.println(readData);
+    Serial.println("----------------------");
+    readData="";
   }
-//while (Serial.available() && c!='E') {
-//    c = Serial.read();
-//    readdata = readdata + c;
-//    flag=1;
-//    Serial.println(c);
-//  }
-//  if (flag==1)
-//  {
-//    Serial.println(readdata);
-//    Serial.println("-------------------------------");
-//  }
 }

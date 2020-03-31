@@ -1,5 +1,5 @@
-const int Y_pin = 0; // analog pin connected to X output
-const int X_pin = 1; // analog pin connected to Y output
+//const int Y_pin = 0; // analog pin connected to X output
+//const int X_pin = 1; // analog pin connected to Y output
 
 int enableLPin = 3; // pin 1 on L293D IC
 int enableRPin = 9; // pin 9 on L293D IC
@@ -12,13 +12,17 @@ int motorRPinB = 8; // pin 15 on L293D IC
 
 int motorL = 0;
 int motorR = 0;
+
 float xReading = 0;
 float yReading = 0;
+float xReadingBT = 0;
+float yReadingBT = 0;
 
+char c;
 
 float v;
 float vRaw;
-int state;
+String readData;
 int flag = 0;      //makes sure that the serial only prints once the state
 int stateStop = 0;
 float normalize = 256/363;
@@ -41,15 +45,40 @@ void setup() {
 
 void loop() {
   //if some date is sent, reads it and saves in state
-  if (Serial.available() > 0) {
-    state = Serial.read();
-    //Serial.print(state);
-    flag = 0;
+  flag=0;
+  
+  if (Serial.available()>0)
+  {
+    c = Serial.read();
+    //Serial.println(c);
+  }
+
+  if (c!=',' && c!='E')
+  {
+    readData += c;
+  }
+  else if (c==',')
+  {
+    xReadingBT = readData.toInt();
+    //readData = "";
+  }
+  else if (c=='E')
+  {
+    yReadingBT = readData.toInt();
+    //readData="";
+    flag=1;
+  }
+  
+  if (flag==1)
+  {
+    Serial.println(readData);
+    Serial.println("----------------------");
+    readData="";
   }
 
   //xReading and yReading have a range of 0 - 1023, but to understand the code easier I have mapped it to the range -255 - 255
-  xReading = map(analogRead(X_pin), 0, 1023, -255, 255);
-  yReading = -(map(analogRead(Y_pin), 0, 1023, -255, 255));
+  xReading = map(analogRead(xReadingBT), 0, 999, -255, 255);
+  yReading = -(map(analogRead(yReadingBT), 0, 999, -255, 255));
 
   //vRaw is the distance of the joystick from the rest position. This is used to determine the speed at which to move the robot (v). 
   vRaw = sqrt(pow(yReading,2) + pow(xReading,2));
@@ -99,7 +128,7 @@ void loop() {
   Serial.print(", ");
   Serial.print(motorR);
   Serial.print(" | ");
-  Serial.print(state);
+  Serial.print(readData);
   
   
   Serial.println("");
