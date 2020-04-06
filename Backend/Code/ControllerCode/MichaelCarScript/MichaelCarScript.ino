@@ -13,10 +13,10 @@ int motorRPinB = 8; // pin 15 on L293D IC
 int motorL = 0;
 int motorR = 0;
 
-float xReading = 0;
-float yReading = 0;
-float xReadingBT = 0;
-float yReadingBT = 0;
+int xReading = 0;
+int yReading = 0;
+int xReadingBT = 0;
+int yReadingBT = 0;
 
 char c;
 
@@ -47,39 +47,48 @@ void loop() {
   //if some date is sent, reads it and saves in state
   flag=0;
   
-  if (Serial.available()>0)
+  while (Serial.available()>0)
   {
     c = Serial.read();
-    //Serial.println(c);
+    //Serial.println(c);  
+    if (c!=',' && c!='E')
+    {
+      readData += c;
+    }
+    else if (c==',')
+    {
+      xReadingBT = readData.toInt();
+      readData = "";
+    }
+    else if (c=='E')
+    {
+      //Serial.print('2');
+      yReadingBT = readData.toInt();
+      readData="";
+      flag=1;
+      break;
+    }
+    
+    if (flag==1)
+    {
+//      Serial.print(xReadingBT);
+//      Serial.print(",");
+//      Serial.println(yReadingBT);
+  //    Serial.print("---");
+  //    Serial.println(readData);
+  //    Serial.println("----------------------");
+      readData="";
+    }
   }
 
-  if (c!=',' && c!='E')
-  {
-    readData += c;
-  }
-  else if (c==',')
-  {
-    xReadingBT = readData.toInt();
-    //readData = "";
-  }
-  else if (c=='E')
-  {
-    yReadingBT = readData.toInt();
-    //readData="";
-    flag=1;
-  }
-  
-  if (flag==1)
-  {
-    Serial.println(readData);
-    Serial.println("----------------------");
-    readData="";
-  }
+
 
   //xReading and yReading have a range of 0 - 1023, but to understand the code easier I have mapped it to the range -255 - 255
-  xReading = map(analogRead(xReadingBT), 0, 999, -255, 255);
-  yReading = -(map(analogRead(yReadingBT), 0, 999, -255, 255));
-
+  xReading = map(xReadingBT, 0, 999, -255, 255);
+  yReading = -(map(yReadingBT, 0, 999, -255, 255));
+//  Serial.print(xReading);
+//  Serial.print(",");
+//  Serial.println(yReading);
   //vRaw is the distance of the joystick from the rest position. This is used to determine the speed at which to move the robot (v). 
   vRaw = sqrt(pow(yReading,2) + pow(xReading,2));
   
@@ -107,8 +116,8 @@ void loop() {
   
   else if (xReading < 0 && yReading < 0)
   {
-      motorL = -v ;
-      motorR = -v- xReading;
+      motorL = -v;
+      motorR = -v -xReading;
   }
   
    
@@ -116,25 +125,11 @@ void loop() {
 //  motorL = yReading;
 //  motorR = yReading;
 
-  //if you open the serial monitor, you can see the values of the joystick readings, the speeds written to each motor and the value of v
-  Serial.print("JOYSTICK  ");
-  Serial.print(xReading);
-  Serial.print(", ");
-  Serial.print(yReading);
-  Serial.print("  -----  ");
-
-  Serial.print("MOTOR  ");
-  Serial.print(motorL);
-  Serial.print(", ");
-  Serial.print(motorR);
-  Serial.print(" | ");
-  Serial.print(readData);
   
-  
-  Serial.println("");
 
   //the joystick rests slightly off of (0,0), so this means that if it isn't more than 10 away from the centre then the robot should stay at rest
-  if (abs(motorL) > 10 or abs(motorR) > 10)
+  
+  if (abs(motorL) > 10 || abs(motorR) > 10)
   {
     //if stateents to determine which pins to set high depending on the speed set to each motor
       if (motorL >= 0)
@@ -168,7 +163,21 @@ void loop() {
         {
           motorR = 255* motorR / abs(motorR); 
         }
-        
+    //if you open the serial monitor, you can see the values of the joystick readings, the speeds written to each motor and the value of v
+  Serial.print("");
+  Serial.print("JOYSTICK  ");
+  Serial.print(xReading);
+  Serial.print(", ");
+  Serial.print(yReading);
+  Serial.print("  -----  ");
+
+  Serial.print("MOTOR  ");
+  Serial.print(motorL);
+  Serial.print(", ");
+  Serial.print(motorR);
+  Serial.print(" | ");
+  Serial.print(v);
+  Serial.println("");
     
         analogWrite(enableLPin, abs(motorL));
         analogWrite(enableRPin, abs(motorR));

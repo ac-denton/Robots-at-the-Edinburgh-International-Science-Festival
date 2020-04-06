@@ -8,10 +8,10 @@ void setup() {
 }
 
 void loop() {
- delay(150);
+ delay(30);
  xReading = map(analogRead(X_pin), 0, 1023, 0, 999);
  yReading = map(analogRead(Y_pin), 0, 1023, 0, 999);
  Command = String(xReading) + ',' + String(yReading) + 'E';
- Serial.println(Command); // Sends '1' to serialout
+ Serial.print(Command); // Sends '1' to serialout
  
 }
