@@ -15,10 +15,11 @@ int motorR = 0;
 
 int xReading = 0;
 int yReading = 0;
-int xReadingBT = 0;
-int yReadingBT = 0;
+int xReadingBT = 499;
+int yReadingBT = 499;
 
 char c;
+String instruction = "";
 
 float v;
 float vRaw;
@@ -26,6 +27,8 @@ String readData;
 int flag = 0;      //makes sure that the serial only prints once the state
 int stateStop = 0;
 float normalize = 256/363;
+int counter = 0;
+
 void setup() {
   // sets the pins as outputs:
 
@@ -49,51 +52,68 @@ void loop() {
   
   while (Serial.available()>0)
   {
+    counter++;
+    //Serial.println("Hey, you're receiving cereal!!! ");
     c = Serial.read();
-    //Serial.println(c);  
+    instruction+=c;
+    //Serial.print(String(c));  
     if (c!=',' && c!='E')
     {
       readData += c;
     }
     else if (c==',')
     {
-      xReadingBT = readData.toInt();
+      if (readData.toInt() <= 999 and readData.toInt() >= 0)
+      {
+        xReadingBT = readData.toInt();
+      }
       readData = "";
     }
     else if (c=='E')
     {
       //Serial.print('2');
-      yReadingBT = readData.toInt();
+      if (readData.toInt() <= 999 and readData.toInt() >= 0)
+      
+      {
+        yReadingBT = readData.toInt();
+      }
       readData="";
-      flag=1;
+      Serial.print(instruction);
+      for (int i = 0;  i+instruction.length() < 9; i++)
+      {
+        Serial.print(" ");
+      }
+      flag = 1;
+      instruction = "";
       break;
     }
     
-    if (flag==1)
-    {
-//      Serial.print(xReadingBT);
-//      Serial.print(",");
-//      Serial.println(yReadingBT);
-  //    Serial.print("---");
-  //    Serial.println(readData);
-  //    Serial.println("----------------------");
-      readData="";
-    }
+    
+    
   }
+  if (flag == 0)
+    {
+      Serial.print("         ");
+    }
+  //Serial.flush();
 
 
 
   //xReading and yReading have a range of 0 - 1023, but to understand the code easier I have mapped it to the range -255 - 255
   xReading = map(xReadingBT, 0, 999, -255, 255);
   yReading = -(map(yReadingBT, 0, 999, -255, 255));
-//  Serial.print(xReading);
-//  Serial.print(",");
-//  Serial.println(yReading);
+  Serial.print("(" + String(xReadingBT) + ", " + String(yReadingBT) + ") ");
+ 
   //vRaw is the distance of the joystick from the rest position. This is used to determine the speed at which to move the robot (v). 
-  vRaw = sqrt(pow(yReading,2) + pow(xReading,2));
+  v = sqrt(pow(yReading,2) + pow(xReading,2));
+  if (v>255)
+  {
+    v=255;
+  }
+ 
   
   //the maximum value for vRaw is 363 which needs reducing to 255
-  v = map(vRaw, 0, 363, 0, 255);
+  //v = map(vRaw, 0, 363, 0, 255);
 
   //Different steering quadrants
   if (xReading >= 0 && yReading >= 0)
@@ -129,7 +149,7 @@ void loop() {
 
   //the joystick rests slightly off of (0,0), so this means that if it isn't more than 10 away from the centre then the robot should stay at rest
   
-  if (abs(motorL) > 10 || abs(motorR) > 10)
+  if (v>20)
   {
     //if stateents to determine which pins to set high depending on the speed set to each motor
       if (motorL >= 0)
@@ -164,7 +184,21 @@ void loop() {
           motorR = 255* motorR / abs(motorR); 
         }
     //if you open the serial monitor, you can see the values of the joystick readings, the speeds written to each motor and the value of v
-  Serial.print("");
+  
+    
+        analogWrite(enableLPin, abs(motorL));
+        analogWrite(enableRPin, abs(motorR));
+  }
+  //makes the robot stay at rest if the joystickis at rest 
+  else
+  {
+      digitalWrite(motorLPinF, LOW);
+      digitalWrite(motorLPinB, LOW);
+      digitalWrite(motorRPinF, LOW);
+      digitalWrite(motorRPinB, LOW);
+  }
+
+  
   Serial.print("JOYSTICK  ");
   Serial.print(xReading);
   Serial.print(", ");
@@ -178,17 +212,5 @@ void loop() {
   Serial.print(" | ");
   Serial.print(v);
   Serial.println("");
-    
-        analogWrite(enableLPin, abs(motorL));
-        analogWrite(enableRPin, abs(motorR));
-  }
-  //makes the robot stay at rest if the joystickis at rest 
-  else
-  {
-      digitalWrite(motorLPinF, LOW);
-      digitalWrite(motorLPinB, LOW);
-      digitalWrite(motorRPinF, LOW);
-      digitalWrite(motorRPinB, LOW);
-  }
 }
   

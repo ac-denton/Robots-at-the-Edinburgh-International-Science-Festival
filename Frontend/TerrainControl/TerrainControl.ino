@@ -1,15 +1,28 @@
 
 #include <Servo.h>
 Servo myServo;
+
+const int playButton = 2;
+
 int greenGoals = 0;
-int LEDG1 = 3;
-int LEDG2 = 4;
-int LEDG3 = 5;
+const int LEDG1 = 3;
+const int LEDG2 = 4;
+const int LEDG3 = 5;
+
+const int echoPinG = 6;
+const int trigPinG = 7;
+float durationG;
+float distanceG;
 
 int yellowGoals = 0;
-int LEDY1 = 6;
-int LEDY2 = 7;
-int LEDY3 = 8;
+const int LEDY1 = 8;
+const int LEDY2 = 9;
+const int LEDY3 = 10;
+
+const int echoPinY = 11;
+const int trigPinY = 12;
+float durationY;
+float distanceY;
 
 bool goalScored = false;
 
@@ -25,18 +38,22 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   myServo.attach(13);
-  pinMode(pushButton, INPUT);
   myServo.write(pos);
   
-  pinMode(A0, INPUT);
+  pinMode(pushButton, INPUT);
+  
   pinMode(LEDG1, OUTPUT);
   pinMode(LEDG2, OUTPUT);
   pinMode(LEDG3, OUTPUT);
+
   
-  pinMode(A1, INPUT);
   pinMode(LEDY1, OUTPUT);
   pinMode(LEDY2, OUTPUT);
   pinMode(LEDY3, OUTPUT);
+  
+  pinMode(trigPinY, OUTPUT);
+  pinMode(echoPinY, INPUT);
+  
 
 }
 
@@ -45,25 +62,28 @@ void loop() {
    //put your main code here, to run repeatedly:
 //   greenGoals = 0;
 //   yellowGoals = 0;
-  while (gameInProgress == false)
-  {
-    digitalWrite(LEDG1, HIGH);
-    digitalWrite(LEDG2, LOW);
-    digitalWrite(LEDG3, LOW);
-    delay(500);
-    digitalWrite(LEDG1, HIGH);
-    digitalWrite(LEDG2, HIGH);
-    digitalWrite(LEDG3, LOW);
-    delay(500);
-    digitalWrite(LEDG1, HIGH);
-    digitalWrite(LEDG2, HIGH);
-    digitalWrite(LEDG3, HIGH);
-    delay(500);
-    digitalWrite(LEDG1, LOW);
-    digitalWrite(LEDG2, LOW);
-    digitalWrite(LEDG3, LOW);
-    delay(500);
-  }
+//  while (gameInProgress == false)
+//  {
+//    digitalWrite(LEDG1, HIGH);
+//    digitalWrite(LEDG2, LOW);
+//    digitalWrite(LEDG3, LOW);
+//    delay(500);
+//    digitalWrite(LEDG1, HIGH);
+//    digitalWrite(LEDG2, HIGH);
+//    digitalWrite(LEDG3, LOW);
+//    delay(500);
+//    digitalWrite(LEDG1, HIGH);
+//    digitalWrite(LEDG2, HIGH);
+//    digitalWrite(LEDG3, HIGH);
+//    delay(500);
+//    digitalWrite(LEDG1, LOW);
+//    digitalWrite(LEDG2, LOW);
+//    digitalWrite(LEDG3, LOW);
+//    delay(500);
+//  }
+
+
+  
   pushStatus = digitalRead(pushButton);
   
   if (pushStatus == HIGH)
@@ -75,25 +95,47 @@ void loop() {
   {
     gameInProgress = false;
   }
-  while (gameInProgress==false)
+  while (gameInProgress==true)
   {
-    float GGoal = analogRead(A0);
-    float YGoal = analogRead(A1); 
-    Serial.println(GGoal);
+    
+    digitalWrite(trigPinY, LOW);
+    digitalWrite(trigPinG, LOW);
+    delay(2);
+    digitalWrite(trigPinY, HIGH);
+    digitalWrite(trigPinG, HIGH);
+    delay(10);
+    digitalWrite(trigPinY, LOW);
+    digitalWrite(trigPinG, LOW);
+  
+    durationY = pulseIn(echoPinY, HIGH);
+    durationG = pulseIn(echoPinG, HIGH);
+    distanceY = durationY * 0.034/2;
+    distanceG = durationG * 0.034/2;
+    Serial.println(String(distanceY) + ", " + String(distanceG));
 
-    if (GGoal <= 10)
+    if (distanceG <= 10)
     {
       greenGoals++;
-      goalScored = true;
+      ballReload();
+
+//      digitalWrite(LEDG1, HIGH);
+//      delay(500);
+//      digitalWrite(LEDG1, LOW);
+//      delay(500);
+//      digitalWrite(LEDG1, HIGH);
+//      delay(500);
+//      digitalWrite(LEDG1, LOW);
+//      delay(500);
+//      digitalWrite(LEDG1, HIGH);
+
     }
 
-    if (YGoal <= 10)
+    if (distanceY <= 10)
     {
       yellowGoals++;
-      goalScored = true;
+      ballReload();
     }
     
-    //Servo code on a timer
     
     if (greenGoals == 0)
     {
@@ -115,6 +157,7 @@ void loop() {
     }
     else if (greenGoals == 3)
     {
+      greenGoals = 0; 
       gameInProgress = false;
       i= 0;
       while (i < 10)
@@ -137,11 +180,11 @@ void loop() {
         digitalWrite(LEDG1, HIGH);
         digitalWrite(LEDG2, HIGH);
         digitalWrite(LEDG3, HIGH);
-        delay(500);
+        delay(200);
         digitalWrite(LEDG1, LOW);
         digitalWrite(LEDG2, LOW);
         digitalWrite(LEDG3, LOW);
-        delay(500);
+        delay(200);
       }
     }
 
@@ -165,6 +208,7 @@ void loop() {
     }
     else if (yellowGoals == 3)
     {
+      yellowGoals = 0;
       gameInProgress = false;
       i= 0;
       while (i < 10)
@@ -195,11 +239,7 @@ void loop() {
       }
    
     }
-    if (goalScored == true)
-    {
-      ballReload();
-      goalScored = false;
-    }
+
     
  
   
@@ -214,6 +254,7 @@ void loop() {
 }
 void ballReload()
 {
+  delay(6000);
   while(pos>0)
       {
         pos = pos-1;

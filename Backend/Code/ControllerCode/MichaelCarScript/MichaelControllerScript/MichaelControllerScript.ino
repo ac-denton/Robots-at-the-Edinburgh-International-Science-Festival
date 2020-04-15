@@ -13,5 +13,5 @@ void loop() {
  yReading = map(analogRead(Y_pin), 0, 1023, 0, 999);
  Command = String(xReading) + ',' + String(yReading) + 'E';
  Serial.print(Command); // Sends '1' to serialout
- 
+ //Serial.flush();
 }
