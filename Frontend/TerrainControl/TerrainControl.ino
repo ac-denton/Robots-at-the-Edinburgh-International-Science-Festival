@@ -2,6 +2,12 @@
 #include <Servo.h>
 Servo myServo;
 
+int reloadDelay = 6500;
+int stage = 0;
+
+unsigned long currentMillis;
+unsigned long previousMillis = 0;
+
 const int playButton = 2;
 
 int greenGoals = 0;
@@ -14,20 +20,21 @@ const int trigPinG = 7;
 float durationG;
 float distanceG;
 
-int yellowGoals = 0;
-const int LEDY1 = 8;
-const int LEDY2 = 9;
-const int LEDY3 = 10;
+int blueGoals = 0;
+const int LEDB1 = 8;
+const int LEDB2 = 9;
+const int LEDB3 = 10;
 
-const int echoPinY = 11;
-const int trigPinY = 12;
-float durationY;
-float distanceY;
+const int echoPinB = 11;
+const int trigPinB = 12;
+float durationB;
+float distanceB;
 
 bool goalScored = false;
 
-const int pushButton = 12;
-int pos = 180;
+const int posBottom = 178;
+const int posTop = 20;
+int pos = posBottom;
 int i = 0;
 bool pushStatus = LOW;
 bool pushStatusTemp = LOW;
@@ -40,103 +47,155 @@ void setup() {
   myServo.attach(13);
   myServo.write(pos);
   
-  pinMode(pushButton, INPUT);
+  pinMode(playButton, INPUT);
   
   pinMode(LEDG1, OUTPUT);
   pinMode(LEDG2, OUTPUT);
   pinMode(LEDG3, OUTPUT);
 
   
-  pinMode(LEDY1, OUTPUT);
-  pinMode(LEDY2, OUTPUT);
-  pinMode(LEDY3, OUTPUT);
+  pinMode(LEDB1, OUTPUT);
+  pinMode(LEDB2, OUTPUT);
+  pinMode(LEDB3, OUTPUT);
   
-  pinMode(trigPinY, OUTPUT);
-  pinMode(echoPinY, INPUT);
-  
-
+  pinMode(trigPinB, OUTPUT);
+  pinMode(echoPinB, INPUT);
+  pinMode(trigPinG, OUTPUT);
+  pinMode(echoPinG, INPUT);
+  delay(4000);
 }
 
 void loop() {
 
    //put your main code here, to run repeatedly:
-//   greenGoals = 0;
-//   yellowGoals = 0;
-//  while (gameInProgress == false)
-//  {
-//    digitalWrite(LEDG1, HIGH);
-//    digitalWrite(LEDG2, LOW);
-//    digitalWrite(LEDG3, LOW);
-//    delay(500);
-//    digitalWrite(LEDG1, HIGH);
-//    digitalWrite(LEDG2, HIGH);
-//    digitalWrite(LEDG3, LOW);
-//    delay(500);
-//    digitalWrite(LEDG1, HIGH);
-//    digitalWrite(LEDG2, HIGH);
-//    digitalWrite(LEDG3, HIGH);
-//    delay(500);
-//    digitalWrite(LEDG1, LOW);
-//    digitalWrite(LEDG2, LOW);
-//    digitalWrite(LEDG3, LOW);
-//    delay(500);
-//  }
+   resetGame();
+   updateGreenGoals();
+   updateBlueGoals();
+   currentMillis = millis();
+  if (currentMillis - previousMillis >= 300) 
+  {
+    previousMillis = currentMillis;
+    stage++;
+  }
 
 
+  if (stage == 0)
+  {
+    digitalWrite(LEDG1, HIGH);
+    digitalWrite(LEDG2, LOW);
+    digitalWrite(LEDG3, LOW);
+    digitalWrite(LEDB1, HIGH);
+    digitalWrite(LEDB2, LOW);
+    digitalWrite(LEDB3, LOW);
+  }
+  else if (stage == 1)
+  {
+    digitalWrite(LEDG1, LOW);
+    digitalWrite(LEDG2, HIGH);
+    digitalWrite(LEDB1, LOW);
+    digitalWrite(LEDB2, HIGH);
+  }
+  else if (stage == 2)
+  {
+    digitalWrite(LEDG2, LOW);
+    digitalWrite(LEDG3, HIGH);
+    digitalWrite(LEDB2, LOW);
+    digitalWrite(LEDB3, HIGH);
+  }
+  else if (stage == 3)
+  { 
+    digitalWrite(LEDG3, LOW);
+    digitalWrite(LEDG2, HIGH);
+    digitalWrite(LEDB3, LOW);
+    digitalWrite(LEDB2, HIGH);
+  }
+  else
+  {
+    stage = 0;
+  }
   
-  pushStatus = digitalRead(pushButton);
+  
+  pushStatus = digitalRead(playButton);
   
   if (pushStatus == HIGH)
   {
-    
     gameInProgress = true;
+    digitalWrite(LEDG1, HIGH);
+    digitalWrite(LEDG2, HIGH);
+    digitalWrite(LEDG3, HIGH);
+    digitalWrite(LEDB1, HIGH);
+    digitalWrite(LEDB2, HIGH);
+    digitalWrite(LEDB3, HIGH);
+    delay(1000);
+    digitalWrite(LEDG1, LOW);
+    digitalWrite(LEDB1, LOW);
+    delay(1000);
+    digitalWrite(LEDG2, LOW);
+    digitalWrite(LEDB2, LOW);
+    delay(1000);
+    digitalWrite(LEDG3, LOW);
+    digitalWrite(LEDB3, LOW);
+    delay(1000);
+    ballReload();
   }
   else
   {
     gameInProgress = false;
   }
-  while (gameInProgress==true)
-  {
-    
-    digitalWrite(trigPinY, LOW);
-    digitalWrite(trigPinG, LOW);
-    delay(2);
-    digitalWrite(trigPinY, HIGH);
-    digitalWrite(trigPinG, HIGH);
-    delay(10);
-    digitalWrite(trigPinY, LOW);
-    digitalWrite(trigPinG, LOW);
+
+  Serial.println(String(pushStatus) + " - " + String(currentMillis) + " - " + String(previousMillis));
+  if (gameInProgress == true)
+    {
+    while (gameInProgress==true)
+    {
+      pushStatus = digitalRead(playButton);
+      if (pushStatus == HIGH)
+      {
+        gameInProgress = false;
+        delay(500);
+        break;
+      }
+      //Ultrasonic sensors code for goal detection
+      digitalWrite(trigPinG, LOW);
+      delay(2);
+      digitalWrite(trigPinG, HIGH);
+      delay(10);
+      digitalWrite(trigPinG, LOW);
+      durationG = pulseIn(echoPinG, HIGH);
+      digitalWrite(trigPinB, LOW);
+      delay(2);
+      digitalWrite(trigPinB, HIGH);
+      delay(10);
+      digitalWrite(trigPinB, LOW);
+      durationB = pulseIn(echoPinB, HIGH);
+      
+      distanceB = durationB * 0.034/2;
+      distanceG = durationG * 0.034/2;
+      Serial.println(String(pushStatus) + " " + String(distanceB) + ", " + String(distanceG));
   
-    durationY = pulseIn(echoPinY, HIGH);
-    durationG = pulseIn(echoPinG, HIGH);
-    distanceY = durationY * 0.034/2;
-    distanceG = durationG * 0.034/2;
-    Serial.println(String(distanceY) + ", " + String(distanceG));
-
-    if (distanceG <= 10)
-    {
-      greenGoals++;
-      ballReload();
-
-//      digitalWrite(LEDG1, HIGH);
-//      delay(500);
-//      digitalWrite(LEDG1, LOW);
-//      delay(500);
-//      digitalWrite(LEDG1, HIGH);
-//      delay(500);
-//      digitalWrite(LEDG1, LOW);
-//      delay(500);
-//      digitalWrite(LEDG1, HIGH);
-
+      //Statements to change score upon goal and to commence the 
+      //sequence that puts the ball back into play
+      if ((distanceG <= 5 or distanceG > 15) and distanceG>1)
+      {
+        greenGoals++;
+        updateGreenGoals();
+      }
+  
+      if ((distanceB <= 5 or distanceB > 15) and distanceB>1)
+      {
+        blueGoals++;
+        updateBlueGoals();
+      }  
     }
+  }
+}
 
-    if (distanceY <= 10)
-    {
-      yellowGoals++;
-      ballReload();
-    }
-    
-    
+//-------------------------------------------------------------------
+
+void updateGreenGoals()
+{
+  //Updating the scoreboards
+  
     if (greenGoals == 0)
     {
       digitalWrite(LEDG1, LOW);
@@ -148,20 +207,29 @@ void loop() {
       digitalWrite(LEDG1, HIGH);
       digitalWrite(LEDG2, LOW);
       digitalWrite(LEDG3, LOW);
+      delay(reloadDelay);
+      ballReload();
     }
     else if (greenGoals == 2)
     {
       digitalWrite(LEDG1, HIGH);
       digitalWrite(LEDG2, HIGH);
       digitalWrite(LEDG3, LOW);
+      delay(reloadDelay);
+      ballReload();
     }
     else if (greenGoals == 3)
     {
-      greenGoals = 0; 
+      
+      greenGoals = 0;
+      blueGoals = 0;
       gameInProgress = false;
       i= 0;
-      while (i < 10)
+      while (i < 5 )
       {
+        digitalWrite(LEDB1, LOW);
+        digitalWrite(LEDB2, LOW);
+        digitalWrite(LEDB3, LOW);
         digitalWrite(LEDG1, HIGH);
         digitalWrite(LEDG2, HIGH);
         digitalWrite(LEDG3, HIGH);
@@ -172,6 +240,7 @@ void loop() {
         delay(500);
         i++;
       }
+
     }
     else
     {
@@ -187,86 +256,97 @@ void loop() {
         delay(200);
       }
     }
+}
 
-    if (yellowGoals == 0)
+void updateBlueGoals()
+{
+    if (blueGoals == 0)
     {
-      digitalWrite(LEDY1, LOW);
-      digitalWrite(LEDY2, LOW);
-      digitalWrite(LEDY3, LOW);
+      digitalWrite(LEDB1, LOW);
+      digitalWrite(LEDB2, LOW);
+      digitalWrite(LEDB3, LOW);
     }
-    else if (yellowGoals == 1)
+    else if (blueGoals == 1)
     {
-      digitalWrite(LEDY1, HIGH);
-      digitalWrite(LEDY2, LOW);
-      digitalWrite(LEDY3, LOW);
+      digitalWrite(LEDB1, HIGH);
+      digitalWrite(LEDB2, LOW);
+      digitalWrite(LEDB3, LOW);
+      delay(reloadDelay);
+      ballReload();
     }
-    else if (yellowGoals == 2)
+    else if (blueGoals == 2)
     {
-      digitalWrite(LEDY1, HIGH);
-      digitalWrite(LEDY2, HIGH);
-      digitalWrite(LEDY3, LOW);
+      digitalWrite(LEDB1, HIGH);
+      digitalWrite(LEDB2, HIGH);
+      digitalWrite(LEDB3, LOW);
+      delay(reloadDelay);
+      ballReload();
     }
-    else if (yellowGoals == 3)
+    else if (blueGoals == 3)
     {
-      yellowGoals = 0;
+      greenGoals = 0;
+      blueGoals = 0;
       gameInProgress = false;
       i= 0;
-      while (i < 10)
+      while (i < 5)
       {
-        digitalWrite(LEDY1, HIGH);
-        digitalWrite(LEDY2, HIGH);
-        digitalWrite(LEDY3, HIGH);
+        digitalWrite(LEDG1, LOW);
+        digitalWrite(LEDG2, LOW);
+        digitalWrite(LEDG3, LOW);
+        digitalWrite(LEDB1, HIGH);
+        digitalWrite(LEDB2, HIGH);
+        digitalWrite(LEDB3, HIGH);
         delay(500);
-        digitalWrite(LEDY1, LOW);
-        digitalWrite(LEDY2, LOW);
-        digitalWrite(LEDY3, LOW);
+        digitalWrite(LEDB1, LOW);
+        digitalWrite(LEDB2, LOW);
+        digitalWrite(LEDB3, LOW);
         delay(500);
         i++;
       }
     }
     else
     {
-      while (yellowGoals!= 0)
+      while (blueGoals!= 0)
       {
-        digitalWrite(LEDY1, HIGH);
-        digitalWrite(LEDY2, HIGH);
-        digitalWrite(LEDY3, HIGH);
+      
+        digitalWrite(LEDB1, HIGH);
+        digitalWrite(LEDB2, HIGH);
+        digitalWrite(LEDB3, HIGH);
         delay(900);
-        digitalWrite(LEDY1, LOW);
-        digitalWrite(LEDY2, LOW);
-        digitalWrite(LEDY3, LOW);
+        digitalWrite(LEDB1, LOW);
+        digitalWrite(LEDB2, LOW);
+        digitalWrite(LEDB3, LOW);
         delay(900);
       }
-   
     }
-
     
- 
-  
-    //delay (500);
-  //delay(20);
-//  if (pos==360)
-//  {
-//    pos=0;
-//    }
-  
-  }
 }
 void ballReload()
 {
-  delay(6000);
-  while(pos>0)
+  Serial.println(String(distanceB) + ", " + String(distanceG));
+  //delay(6500);
+  while(pos>posTop)
       {
         pos = pos-1;
         myServo.write(pos);
-        delay(25);
+        delay(8);
       }
-      delay(500);
-      while(pos<180)
+      delay(300);
+      while(pos<posBottom)
       {
         pos = pos+1;
         myServo.write(pos);
-        delay(20);
+        delay(pos/15);
+        if (pos < 100)
+        {
+          //delay(int(pos/20-5));
+        }
         
       }
 };
+void resetGame()
+{
+  greenGoals = 0;
+  blueGoals = 0;
+  
+}
