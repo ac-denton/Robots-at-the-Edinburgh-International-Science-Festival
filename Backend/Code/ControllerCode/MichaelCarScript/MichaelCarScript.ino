@@ -86,7 +86,7 @@ void loop() {
       //Used for 
       for (int i = 0;  i+instruction.length() < 9; i++)
       {
-        Serial.print(" ");
+        //Serial.print(" ");
       }
       //alerts the program that an instruction was successfully received
       flag = 1;
@@ -100,7 +100,7 @@ void loop() {
   }
   if (flag == 0)
     {
-      Serial.print("         ");
+      //Serial.print("         ");
     }
 
 
@@ -108,7 +108,7 @@ void loop() {
   //xReading and yReading have a range of 0 - 1023, but to understand the code easier I have mapped it to the range -255 - 255
   xReading = map(xReadingBT, 0, 999, -255, 255);
   yReading = -(map(yReadingBT, 0, 999, -255, 255));
-  Serial.print("(" + String(xReadingBT) + ", " + String(yReadingBT) + ") ");
+  //Serial.print("(" + String(xReadingBT) + ", " + String(yReadingBT) + ") ");
  
   //vRaw is the distance of the joystick from the rest position. This is used to determine the speed at which to move the robot (v). 
   v = sqrt(pow(yReading,2) + pow(xReading,2));
@@ -118,39 +118,67 @@ void loop() {
   }
  
   
-  //Different steering quadrants for the joystick
-  if (xReading >= 0 && yReading >= 0)
+//  //Different steering quadrants for the joystick
+//  if (xReading >= 0 && yReading >= 0)
+//  {
+//      motorL = v;
+//      motorR = v - xReading;
+//  }
+//  
+//  else if (xReading < 0 && yReading >= 0)
+//  {
+//      motorL = v + xReading;
+//      motorR = v;
+//  }
+//  
+//  else if (xReading >= 0 && yReading < 0)
+//  {
+//      motorL = -v + xReading;
+//      motorR = -v;
+//  }
+//  
+//  else if (xReading < 0 && yReading < 0)
+//  {
+//      motorL = -v;
+//      motorR = -v -xReading;
+//  }
+
+    //Different steering quadrants for the joystick
+
+    //Top quadrant
+  if (yReading >= xReading && yReading >= -xReading)
   {
       motorL = v;
-      motorR = v - xReading;
-  }
-  
-  else if (xReading < 0 && yReading >= 0)
-  {
-      motorL = v + xReading;
       motorR = v;
   }
-  
-  else if (xReading >= 0 && yReading < 0)
-  {
-      motorL = -v + xReading;
-      motorR = -v;
-  }
-  
-  else if (xReading < 0 && yReading < 0)
+  //Bottom quadrant
+  else if (yReading < xReading && yReading < -xReading)
   {
       motorL = -v;
-      motorR = -v -xReading;
+      motorR = -v;
+  }
+  //Left quadrant
+  else if (yReading <= -xReading && yReading >= xReading)
+  {
+      motorL = -v;
+      motorR = v;
+  }
+  //Right quadrant
+  else if (yReading > -xReading && yReading < xReading)
+  {
+      motorL = v;
+      motorR = -v;
   }
   
 
   //the joystick rests slightly off of (0,0), so this means that if it isn't more
   //than 10 away from the centre then the robot should stay at rest
   
-  if (v>20)
+  if (v>50)
   {
     //if statements to determine which pins to set 
     //high depending on the speed set to each motor
+      motorL = -motorL;
       if (motorL >= 0)
         {
           digitalWrite(motorLPinF, HIGH);
@@ -183,8 +211,7 @@ void loop() {
         {
           motorR = 255* motorR / abs(motorR); 
         }
-        analogWrite(enableLPin, abs(motorL));
-        analogWrite(enableRPin, abs(motorR));
+        
   }
   //makes the robot stay at rest if the joystickis at rest 
   else
@@ -193,7 +220,10 @@ void loop() {
       digitalWrite(motorLPinB, LOW);
       digitalWrite(motorRPinF, LOW);
       digitalWrite(motorRPinB, LOW);
+      motorL = 0;
+      motorR = 0;
   }
+  
 
   //Used to monitor what the controller is sending vs what the car is receiving and doing
   Serial.print("JOYSTICK  ");
@@ -201,7 +231,7 @@ void loop() {
   Serial.print(", ");
   Serial.print(yReading);
   Serial.print("  -----  ");
-
+  
   Serial.print("MOTOR  ");
   Serial.print(motorL);
   Serial.print(", ");
