@@ -146,33 +146,33 @@ void loop() {
     //Different steering quadrants for the joystick
 
     //Top quadrant
-//  if (yReading >= xReading && yReading >= -xReading)
-//  {
-//    Serial.print("T ");
-//      motorL = v;
-//      motorR = v;
-//  }
-//  //Bottom quadrant
-//  else if (yReading < xReading && yReading < -xReading)
-//  {
-//    Serial.print("B ");
-//      motorL = v;
-//      motorR = v;
-//  }
-//  //Left quadrant
-//  else if (yReading <= -xReading && yReading >= xReading)
-//  {
-//    Serial.print("L ");
-//      motorL = v;
-//      motorR = v;
-//  }
-//  //Right quadrant
-//  else if (yReading > -xReading && yReading < xReading)
-//  {
-//    Serial.print("R ");
-//      motorL = v;
-//      motorR = v;
-//  }
+  if (yReading >= xReading && yReading >= -xReading)
+  {
+    Serial.print("T ");
+      motorL = v;
+      motorR = v;
+  }
+  //Bottom quadrant
+  else if (yReading < xReading && yReading < -xReading)
+  {
+    Serial.print("B ");
+      motorL = -v;
+      motorR = -v;
+  }
+  //Left quadrant
+  else if (yReading <= -xReading && yReading >= xReading)
+  {
+    Serial.print("L ");
+      motorL = -v;
+      motorR = v;
+  }
+  //Right quadrant
+  else if (yReading > -xReading && yReading < xReading)
+  {
+    Serial.print("R ");
+      motorL = v;
+      motorR = -v;
+  }
   
 
   //the joystick rests slightly off of (0,0), so this means that if it isn't more
@@ -207,17 +207,17 @@ void loop() {
         }
 
         //used to cap the motor speed and direction between the ranges of -255 and 255
-        if (abs(motorL)>=255)
-        {
-          motorL = 255* motorL / abs(motorL);
-        }
-        if (abs(motorR)>=255)
-        {
-          motorR = 255* motorR / abs(motorR); 
-        }
+//        if (abs(motorL)>=255)
+//        {
+//          motorL = 255 * motorL / abs(motorL);
+//        }
+//        if (abs(motorR)>=255)
+//        {
+//          motorR = 255 * motorR / abs(motorR); 
+//        }
 
-        analogWrite(enableLPin, abs(v));
-        analogWrite(enableRPin, abs(v));
+        analogWrite(enableLPin, abs(motorL));
+        analogWrite(enableRPin, abs(motorR));
         
   }
   //makes the robot stay at rest if the joystickis at rest 
